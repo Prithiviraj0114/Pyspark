@@ -1,14 +1,25 @@
 
+# Step 1: Configure Python Worker
+import os
+import sys
+
+os.environ["PYSPARK_PYTHON"] = sys.executable
+os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
+os.environ["SPARK_LOCAL_IP"] = "127.0.0.1"
+
+# Step 2: Import Libraries
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StringType
 
-# Step 1: Create Spark Session
+# Step 3: Create Spark Session
 spark = SparkSession.builder \
+    .master("local[2]") \
     .appName("Count Non String Columns") \
-    .master("local[*]") \
+    .config("spark.driver.host", "127.0.0.1") \
+    .config("spark.driver.bindAddress", "127.0.0.1") \
     .getOrCreate()
 
-# Step 2: Create Sample Data
+# Step 4: Create Sample Data
 data = [
     (1, "Abinash", 25, 45000.50),
     (2, "Arun", 22, 35000.00),
@@ -17,23 +28,23 @@ data = [
 
 columns = ["ID", "Name", "Age", "Salary"]
 
-# Step 3: Create DataFrame
+# Step 5: Create DataFrame
 df = spark.createDataFrame(data, columns)
 
-# Step 4: Display DataFrame
+# Step 6: Display DataFrame
 df.show()
 
-# Step 5: Display Schema
+# Step 7: Display Schema
 df.printSchema()
 
-# Step 6: Count Non-String Columns
+# Step 8: Count Non-String Columns
 count = sum(
     1 for field in df.schema.fields
     if not isinstance(field.dataType, StringType)
 )
 
-# Step 7: Print Result
+# Step 9: Print Result
 print("Number of columns that are not strings:", count)
 
-# Step 8: Stop Spark Session
+# Step 10: Stop Spark
 spark.stop()
